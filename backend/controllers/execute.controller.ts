@@ -1,11 +1,26 @@
 import { Request, Response } from "express";
+import { z } from "zod";
 
 import { addJob } from "../workers/execute.worker";
 
-export const executeController = async(req:Request,res:Response) =>{
-    const {language, code} = req.body;
-    
-    const output = await addJob(language, code)
+const executeSchema = z.object({
+  language: z.string().min(1, "language is required").max(100, "language is too long"),
+  code: z.string().min(1, "code is required").max(50000, "code is too long"),
+});
 
-    res.status(200).json({message:output})
-}
+export const executeController = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const validatedBody = executeSchema.parse(req.body);
+        const { language, code } = validatedBody;
+
+        const output = await addJob(language, code);
+
+        res.status(200).json({ message: output });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ errors: error.issues });
+            return;
+        }
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

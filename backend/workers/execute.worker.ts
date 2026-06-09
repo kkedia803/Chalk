@@ -1,20 +1,14 @@
 import crypto from "crypto";
 import { executeService } from "../services/execute.service";
 
-type Job = {
-  id: string;
-  language: string;
-  code: string;
-  resolve: (result: any) => void;
-  reject: (error: any) => void;
-};
+import { Job , supportedLanguage} from "../types";
 
 const jobQueue: Job[] = [];
 
 let MAX_CONCURRENCY = 2;
 let active_jobs = 0;
 
-export const addJob = (language: string, code: string) => {
+export const addJob = (language: supportedLanguage, code: string) => {
   return new Promise((resolve, reject) => {
     jobQueue.push({
       id: crypto.randomUUID(),

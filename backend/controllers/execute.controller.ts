@@ -4,7 +4,7 @@ import { z } from "zod";
 import { addJob } from "../workers/execute.worker";
 
 const executeSchema = z.object({
-  language: z.string().min(1, "language is required").max(100, "language is too long"),
+  language: z.enum(["javascript","python","java","cpp"]),
   code: z.string().min(1, "code is required").max(50000, "code is too long"),
 });
 

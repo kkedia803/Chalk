@@ -1,9 +1,20 @@
+export type JobStatus = "queued" | "running" | "completed" | "failed";
+
+export type DBJob = {
+  id: string;
+  language: supportedLanguage;
+  code: string;
+  status: JobStatus;
+  output: string | null;
+  error: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type Job = {
   id: string;
   language: supportedLanguage;
   code: string;
-  resolve: (result: any) => void;
-  reject: (error: any) => void;
 };
 
 export type languageConfig = {

@@ -2,10 +2,10 @@ import dotenv from 'dotenv'
 dotenv.config();
 const port = process.env.PORT;
 import app from "./app";
-import { initDB } from "./db";
+import { testDB } from './db';
 
 const startServer = async () => {
-  await initDB();
+  await testDB();
   app.listen(port, () => {
     console.log(`Listening at port : ${port}`);
   });

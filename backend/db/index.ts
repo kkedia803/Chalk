@@ -1,33 +1,16 @@
+import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
+import * as schema from "./schema"
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-export const query = (text: string, params?: any[]) => {
-  return pool.query(text, params);
-};
 
-export const initDB = async () => {
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS jobs (
-      id VARCHAR(255) PRIMARY KEY,
-      language VARCHAR(50) NOT NULL,
-      code TEXT NOT NULL,
-      status VARCHAR(50) NOT NULL,
-      output TEXT,
-      error TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `;
-  try {
-    await query(createTableQuery);
-    console.log("Database initialized successfully.");
-  } catch (err) {
-    console.error("Error initializing database", err);
-  }
-};
+export const testDB = async () =>{
+  const res = await db.execute("SELECT 1");
+  console.log("DB connected:",res.rows)
+}
+
+export const db = drizzle(pool,{schema});
+

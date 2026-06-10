@@ -1,8 +1,10 @@
 import crypto from "crypto";
 import { executeService } from "../services/execute.service";
-import { query } from "../db";
+import { db } from "../db";
 
 import { Job , supportedLanguage } from "../types";
+import { Jobs } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 const jobQueue: Job[] = [];
 
@@ -12,10 +14,13 @@ let active_jobs = 0;
 export const addJob = async (language: supportedLanguage, code: string): Promise<string> => {
   const jobId = crypto.randomUUID();
 
-  await query(
-    `INSERT INTO jobs (id, language, code, status) VALUES ($1, $2, $3, $4)`,
-    [jobId, language, code, "queued"]
-  );
+  await db.insert(Jobs).values({
+    id:jobId,
+    language,
+    code,
+    status:"queued",
+    createdAt:new Date(),
+  })
 
   jobQueue.push({
     id: jobId,
@@ -42,23 +47,33 @@ const processQueue = () => {
 
 const executeJob = async (job: Job) => {
   try {
-    await query(
-      `UPDATE jobs SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-      ["running", job.id]
-    );
+
+    await db.update(Jobs).set({
+      status:"running",
+      updatedAt:new Date(),
+    })
+    .where(eq(Jobs.id, job.id))
 
     const response = await executeService(job.language, job.code);
 
-    await query(
-      `UPDATE jobs SET status = $1, output = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3`,
-      ["completed", response, job.id]
-    );
+    await db.update(Jobs).set({
+      status:"completed",
+      output:response,
+      updatedAt:new Date(),
+    })
+    .where(eq(Jobs.id,job.id))
+
   } catch (err: any) {
+
     const errorMsg = err?.message || String(err);
-    await query(
-      `UPDATE jobs SET status = $1, error = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3`,
-      ["failed", errorMsg, job.id]
-    );
+ 
+    await db.update(Jobs).set({
+      status:"failed",
+      error:errorMsg,
+      updatedAt:new Date(),
+    })
+    .where(eq(Jobs.id,job.id))
+
   } finally {
     active_jobs--;
     processQueue();

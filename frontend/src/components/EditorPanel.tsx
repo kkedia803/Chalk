@@ -1,11 +1,12 @@
 import { useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnMount } from "@monaco-editor/react";
-import { useChalk } from "../context/ChalkContext";
+import type { editor } from "monaco-editor";
+import { useChalk } from "../hooks/useChalk";
 
 export default function EditorPanel() {
   const { language, code, setCode } = useChalk();
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;

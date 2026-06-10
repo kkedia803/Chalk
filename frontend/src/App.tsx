@@ -1,5 +1,5 @@
-import { ChalkProvider } from "./context/ChalkContext";
-import { useChalk } from "./context/ChalkContext";
+import { ChalkProvider } from "./context/ChalkProvider";
+import { useChalk } from "./hooks/useChalk";
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import EditorPanel from "./components/EditorPanel";

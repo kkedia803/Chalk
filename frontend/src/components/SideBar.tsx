@@ -1,13 +1,6 @@
-import { useChalk } from "../context/ChalkContext";
+import { useChalk } from "../hooks/useChalk";
 import { LANGUAGES } from "../types";
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-mono text-[10px] font-medium tracking-[0.1em] uppercase text-Chalk-muted mb-2">
-      {children}
-    </p>
-  );
-}
+import { SectionLabel } from "./ui/SectionLabel";
 
 export default function Sidebar() {
   const { language, setLanguage } = useChalk();

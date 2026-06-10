@@ -11,7 +11,7 @@ export type DBJob = {
   updated_at: Date;
 };
 
-export type Job = {
+export type JobType = {
   id: string;
   language: supportedLanguage;
   code: string;

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 
-import { addJob } from "../workers/execute.worker";
+import { addJob } from "../services/createJob.service";
 
 const executeSchema = z.object({
   language: z.enum(["javascript","python","java","cpp"]),

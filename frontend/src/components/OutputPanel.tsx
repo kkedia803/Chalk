@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useChalk } from "../context/ChalkContext"
-import type { OutputLineType } from "../types";
+import { useChalk } from "../hooks/useChalk"
+import type { OutputLineType, OutputLine } from "../types";
 
 const LINE_STYLE: Record<OutputLineType, { text: string; prefix: string; prefixColor: string; bg: string }> = {
   stdout: { text: "text-Chalk-primary",      prefix: "›", prefixColor: "text-Chalk-muted", bg: ""              },
@@ -9,7 +9,7 @@ const LINE_STYLE: Record<OutputLineType, { text: string; prefix: string; prefixC
 };
 
 export default function OutputPanel() {
-  const { outputLines, handleClear } = useChalk();
+  const { outputLines, handleClear, status } = useChalk();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export default function OutputPanel() {
           </div>
         ) : (
           <div className="px-1">
-            {outputLines.map((line, i) => {
+            {outputLines.map((line: OutputLine, i: number) => {
               const s = LINE_STYLE[line.type];
               return (
                 <div

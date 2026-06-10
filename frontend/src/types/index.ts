@@ -53,6 +53,7 @@ export interface UIState {
 // ─── Context shape ───────────────────────────────────────────────────────────
 
 export interface ChalkContextValue {
+  status: ExecutionStatus;
   // editor
   language: Language;
   code: string;
@@ -70,3 +71,4 @@ export interface ChalkContextValue {
   toggleOutput: () => void;
 
 }
+export type ExecutionStatus = "idle" | "running" | "success" | "error";

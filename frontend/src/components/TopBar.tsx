@@ -1,27 +1,8 @@
-import { useChalk } from "../context/ChalkContext";
-
-function IconBtn({
-  onClick,
-  title,
-  children,
-}: {
-  onClick?: () => void;
-  title?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      className="flex items-center justify-center w-7 h-7 rounded text-Chalk-secondary hover:bg-Chalk-hover hover:text-Chalk-primary transition-colors duration-100 flex-shrink-0"
-    >
-      {children}
-    </button>
-  );
-}
+import { useChalk } from "../hooks/useChalk";
+import { IconBtn } from "./ui/IconBtn";
 
 export default function Topbar() {
-  const { language, handleRun, toggleSidebar, toggleOutput } = useChalk();
+  const { language, handleRun, toggleSidebar, toggleOutput, status } = useChalk();
 
   return (
     <header className="flex items-center justify-between h-12 px-2.5 border-b border-Chalk-border bg-Chalk-surface flex-shrink-0 z-50 gap-3">

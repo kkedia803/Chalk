@@ -30,7 +30,7 @@ const LINE_STYLE: Record<
 };
 
 export default function OutputPanel() {
-  const { outputLines, handleClear, jobId, pollJob, executionStatus } =
+  const { outputLines, handleClear, jobId, pollJob, executionStatus, runtime } =
     useChalk();
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +42,6 @@ export default function OutputPanel() {
     if (!jobId) return;
 
     void pollJob(jobId);
-    console.log(outputLines);
   }, [jobId]);
 
   return (
@@ -63,9 +62,13 @@ export default function OutputPanel() {
 
           <span className="text-emerald-400">{executionStatus}</span>
 
-          {/* <span className="text-zinc-500">Runtime:</span> */}
+          {executionStatus === "success" && (
+            <div>
+              <span className="text-zinc-500">Runtime: </span>
 
-          {/* <span>124ms</span> */}
+              <span className="text-emerald-400">{runtime} ms</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

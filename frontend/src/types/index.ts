@@ -123,4 +123,6 @@ export interface ChalkContextValue {
   pollJob: (jobId:string) => void;
 
   executionStatus: ExecutionStatus
+
+  runtime: number
 }

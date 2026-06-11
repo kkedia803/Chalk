@@ -3,6 +3,7 @@ import {
   uuid,
   text,
   timestamp,
+  integer
 } from "drizzle-orm/pg-core";
 
 export const Jobs = pgTable("jobs",{
@@ -12,6 +13,7 @@ export const Jobs = pgTable("jobs",{
     status: text().notNull(),
     output: text(),
     error: text(),
+    runtime: integer("runtime"),
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at")
 });

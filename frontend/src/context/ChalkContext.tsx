@@ -38,6 +38,7 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
   const [jobId, setJobId] = useState<string>("");
 
   const [executionStatus, setExecutionStatus] = useState<ExecutionStatus>("idle");
+  const [runtime, setRunTime] = useState(0);
 
   // ── Language change resets editor + output ──────────────────────────────
   const setLanguage = useCallback((lang: Language) => {
@@ -66,7 +67,6 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
 
       const dat = await res.json();
       setJobId(dat.jobId);
-      console.log(dat);
     } catch (err) {
       console.log(err);
     }
@@ -93,6 +93,7 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
           ]);
 
           setExecutionStatus("success");
+          setRunTime(job.runtime);
 
           completed = true;
         }
@@ -162,7 +163,8 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
     toggleOutput,
     jobId,
     pollJob,
-    executionStatus
+    executionStatus,
+    runtime
   };
 
   return (

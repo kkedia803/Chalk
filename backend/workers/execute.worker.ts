@@ -26,7 +26,9 @@ new Worker(
         .update(Jobs)
         .set({
           status: "completed",
-          output: response, 
+          output: response.stdout,
+          error: response.stderr || null, 
+          runtime: response.runtime,
           updatedAt: new Date(),
         })
         .where(eq(Jobs.id, id));

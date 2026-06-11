@@ -10,13 +10,32 @@ function Layout() {
   const { ui } = useChalk();
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-Chalk-base text-Chalk-primary font-sans antialiased">
+    <div className="flex flex-col h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans">
       <TopBar />
+
       <div className="flex flex-1 overflow-hidden">
-        {ui.sidebarOpen && <SideBar />}
-        <div className="flex flex-col flex-1 overflow-hidden min-w-0">
+        <div
+          className={`
+            overflow-hidden
+            transition-all duration-300 ease-in-out
+            ${ui.sidebarOpen ? "w-[14rem] opacity-100" : "w-0 opacity-0"}
+          `}
+        >
+          <SideBar />
+        </div>
+
+        <div className="flex flex-col flex-1 min-w-0">
           <EditorPanel />
-          {ui.outputOpen && <OutputPanel />}
+
+          <div
+            className={`
+              overflow-hidden border-t border-zinc-800
+              transition-all duration-300 ease-in-out
+              ${ui.outputOpen ? "h-[260px]" : "h-0"}
+            `}
+          >
+            <OutputPanel />
+          </div>
         </div>
       </div>
     </div>

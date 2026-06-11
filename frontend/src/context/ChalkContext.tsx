@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import type {ReactNode} from 'react';
+import type { ReactNode } from "react";
 import {
   type Language,
   type OutputLine,
   type UIState,
   type ChalkContextValue,
   DEFAULT_CODE,
+  type ExecutionStatus
 } from "../types";
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -28,39 +29,125 @@ interface ChalkProviderProps {
 
 export function ChalkProvider({ children }: ChalkProviderProps) {
   const [language, setLanguageState] = useState<Language>("javascript");
-  const [code, setCode]               = useState(DEFAULT_CODE["javascript"]);
+  const [code, setCode] = useState(DEFAULT_CODE["javascript"]);
   const [outputLines, setOutputLines] = useState<OutputLine[]>([]);
-  const [ui, setUI] = useState<UIState>({ sidebarOpen: true, outputOpen: true });
+  const [ui, setUI] = useState<UIState>({
+    sidebarOpen: true,
+    outputOpen: true,
+  });
+  const [jobId, setJobId] = useState<string>("");
+
+  const [executionStatus, setExecutionStatus] = useState<ExecutionStatus>("idle");
 
   // ── Language change resets editor + output ──────────────────────────────
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     setCode(DEFAULT_CODE[lang]);
     setOutputLines([]);
+    setExecutionStatus("idle");
   }, []);
 
   // ── Run ─────────────────────────────────────────────────────────────────
-  const handleRun = useCallback(() => {
-    setOutputLines([{
-      type: "system",
-      text: `▶ Running ${language} · ${new Date().toLocaleTimeString()}`,
-      timestamp: new Date().toISOString(),
-    }]);
-    // TODO: call POST /execute, stream SSE chunks into setOutputLines
-    // On complete: setStatus("success" | "error") and push to setHistory
-  }, [language]);
+
+
+  const handleRun = async () => {
+    try {
+      setExecutionStatus("running");
+      const res = await fetch("http://localhost:3000/execute", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language,
+          code,
+        }),
+      });
+
+      const dat = await res.json();
+      setJobId(dat.jobId);
+      console.log(dat);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const pollJob = useCallback(async (jobId: string) => {
+    let completed = false;
+
+    while (!completed) {
+      try {
+        const res = await fetch(`http://localhost:3000/execute/${jobId}`);
+
+        const job = await res.json();
+
+        // setStatus(job.status);
+
+        if (job.status === "completed") {
+          setOutputLines([
+            {
+              type: "stdout",
+              text: job.output ?? "",
+              timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"}),
+            },
+          ]);
+
+          setExecutionStatus("success");
+
+          completed = true;
+        }
+
+        if (job.status === "failed") {
+          setOutputLines([
+            {
+              type: "stderr",
+              text: job.error ?? "Execution failed",
+              timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"}),
+            },
+          ]);
+
+          setExecutionStatus("error");
+
+          completed = true;
+        }
+
+        if (!completed) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      } catch (err) {
+        console.error(err);
+
+        setOutputLines([
+          {
+            type: "stderr",
+            text: "Failed to fetch job status",
+            timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"}),
+          },
+        ]);
+
+        setExecutionStatus("error")
+
+        completed = true;
+      }
+    }
+  },[]);
 
   // ── Clear output ────────────────────────────────────────────────────────
   const handleClear = useCallback(() => {
     setOutputLines([]);
+    setExecutionStatus("idle")
   }, []);
 
   // ── UI toggles ──────────────────────────────────────────────────────────
-  const toggleSidebar = useCallback(() =>
-    setUI(prev => ({ ...prev, sidebarOpen: !prev.sidebarOpen })), []);
+  const toggleSidebar = useCallback(
+    () => setUI((prev) => ({ ...prev, sidebarOpen: !prev.sidebarOpen })),
+    [],
+  );
 
-  const toggleOutput = useCallback(() =>
-    setUI(prev => ({ ...prev, outputOpen: !prev.outputOpen })), []);
+  const toggleOutput = useCallback(
+    () => setUI((prev) => ({ ...prev, outputOpen: !prev.outputOpen })),
+    [],
+  );
 
   const value: ChalkContextValue = {
     language,
@@ -73,11 +160,12 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
     ui,
     toggleSidebar,
     toggleOutput,
+    jobId,
+    pollJob,
+    executionStatus
   };
 
   return (
-    <ChalkContext.Provider value={value}>
-      {children}
-    </ChalkContext.Provider>
+    <ChalkContext.Provider value={value}>{children}</ChalkContext.Provider>
   );
 }

@@ -1,29 +1,72 @@
 // ─── Language ────────────────────────────────────────────────────────────────
 
-export type Language = "javascript" | "typescript" | "python" | "go" | "rust";
+export type Language = "javascript" | "java" | "python" | "cpp";
 
 export interface LanguageMeta {
   id: Language;
   label: string;
   ext: string;
-  dot: string;         // hex color for the language indicator dot
-  monacoLang: string;  // monaco editor language identifier
+  dot: string; // hex color for the language indicator dot
+  monacoLang: string; // monaco editor language identifier
 }
 
 export const LANGUAGES: LanguageMeta[] = [
-  { id: "javascript", label: "JavaScript", ext: ".js", dot: "#f7df1e", monacoLang: "javascript" },
-  { id: "typescript", label: "TypeScript", ext: ".ts", dot: "#3178c6", monacoLang: "typescript" },
-  { id: "python",     label: "Python",     ext: ".py", dot: "#3776ab", monacoLang: "python"     },
-  { id: "go",         label: "Go",         ext: ".go", dot: "#00add8", monacoLang: "go"         },
-  { id: "rust",       label: "Rust",       ext: ".rs", dot: "#ce422b", monacoLang: "rust"       },
+  {
+    id: "javascript",
+    label: "JavaScript",
+    ext: ".js",
+    dot: "#f7df1e",
+    monacoLang: "javascript",
+  },
+  { id: "java", label: "Java", ext: ".java", dot: "#3178c6", monacoLang: "java" },
+  {
+    id: "python",
+    label: "Python",
+    ext: ".py",
+    dot: "#3776ab",
+    monacoLang: "python",
+  },
+  { id: "cpp", label: "C++", ext: ".cpp", dot: "#9b113d", monacoLang: "cpp" },
 ];
 
 export const DEFAULT_CODE: Record<Language, string> = {
-  javascript: `// Welcome to Chalk\nconsole.log("Hello, world!");\n\nconst add = (a, b) => a + b;\nconsole.log(add(2, 3));`,
-  typescript: `// Welcome to Chalk\nconst greet = (name: string): string => {\n  return \`Hello, \${name}!\`;\n};\n\nconsole.log(greet("Chalk"));`,
-  python:     `# Welcome to Chalk\ndef greet(name: str) -> str:\n    return f"Hello, {name}!"\n\nprint(greet("Chalk"))`,
-  go:         `package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello, Chalk!")\n}`,
-  rust:       `fn main() {\n    println!("Hello, Chalk!");\n}`,
+  javascript: `// Welcome to Chalk
+console.log("Hello, world!");
+
+const add = (a, b) => a + b;
+console.log(add(2, 3));`,
+
+  python: `# Welcome to Chalk
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+print(greet("Chalk"))`,
+
+  java: `// Welcome to Chalk
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, Chalk!");
+
+        int a = 2;
+        int b = 3;
+
+        System.out.println(a + b);
+    }
+}`,
+
+  cpp: `// Welcome to Chalk
+#include <iostream>
+
+int main() {
+    std::cout << "Hello, Chalk!" << std::endl;
+
+    int a = 2;
+    int b = 3;
+
+    std::cout << a + b << std::endl;
+
+    return 0;
+}`,
 };
 
 // ─── Execution ───────────────────────────────────────────────────────────────
@@ -33,7 +76,7 @@ export type OutputLineType = "stdout" | "stderr" | "system";
 export interface OutputLine {
   type: OutputLineType;
   text: string;
-  timestamp: string;  // ISO string
+  timestamp: string; // ISO string
 }
 
 export interface ExecutionResult {
@@ -42,6 +85,10 @@ export interface ExecutionResult {
   lines: OutputLine[];
 }
 
+
+// ─── Execution Status ────────────────────────────────────────────────────────────────
+
+export type ExecutionStatus = "idle" | "running" | "success" | "error";
 
 // ─── UI state ────────────────────────────────────────────────────────────────
 
@@ -69,4 +116,11 @@ export interface ChalkContextValue {
   toggleSidebar: () => void;
   toggleOutput: () => void;
 
+  //jobid
+
+  jobId:string
+
+  pollJob: (jobId:string) => void;
+
+  executionStatus: ExecutionStatus
 }

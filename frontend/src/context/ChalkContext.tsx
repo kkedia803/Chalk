@@ -54,7 +54,7 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
   const handleRun = async () => {
     try {
       setExecutionStatus("running");
-      const res = await fetch("http://localhost:3000/execute", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/execute`, {
         method: "post",
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +84,7 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
 
     while (!completed) {
       try {
-        const res = await fetch(`http://localhost:3000/execute/${jobId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/${jobId}`);
 
         const job = await res.json();
 

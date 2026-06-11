@@ -67,8 +67,15 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
 
       const dat = await res.json();
       setJobId(dat.jobId);
-    } catch (err) {
-      console.log(err);
+    } catch (err:any) {
+      setExecutionStatus("error")
+      setOutputLines([...outputLines,
+        {
+          type:"system",
+          text: err.message,
+          timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"})
+        }
+      ])
     }
   };
 

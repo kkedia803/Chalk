@@ -60,7 +60,7 @@ export default function OutputPanel() {
         <div className="flex items-center gap-2 text-xs font-mono">
           <span className="text-zinc-500">Status:</span>
 
-          <span className="text-emerald-400">{executionStatus}</span>
+          <span className={executionStatus === "error" ? "text-red-500" : "text-emerald-400"}>{executionStatus}</span>
 
           {executionStatus === "success" && (
             <div>

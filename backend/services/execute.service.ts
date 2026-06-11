@@ -58,7 +58,7 @@ export const executeService = async (
         [
           "run", // create a container and run it
           "--rm", // remove it after completion
-          "--network",
+          "--net",
           "none", // disable networking, fetch, axios, etc will not work
           "--memory=128m", // continer max ram = 128mb, above it container is killed
           "--cpus=0.5", // limits cpu usage, roughly half a cpu core
@@ -84,7 +84,7 @@ export const executeService = async (
               reject(new Error("Execution timed out"));
               return;
             }
-            reject(error);
+            reject(stderr);
             return;
           }
           resolve({

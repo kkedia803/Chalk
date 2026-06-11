@@ -27,13 +27,13 @@ new Worker(
         .set({
           status: "completed",
           output: response.stdout,
-          error: response.stderr || null, 
+          error: response.stderr || null,
           runtime: response.runtime,
           updatedAt: new Date(),
         })
         .where(eq(Jobs.id, id));
     } catch (err: any) {
-      const errorMsg = err?.message || String(err);
+      const errorMsg = err || String(err);
 
       await db
         .update(Jobs)

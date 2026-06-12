@@ -84,7 +84,7 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
 
     while (!completed) {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/${jobId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/execute/${jobId}`);
 
         const job = await res.json();
 

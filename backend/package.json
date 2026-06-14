@@ -5,25 +5,25 @@
   "main": "server.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-
     "dev": "nodemon server.ts",
-    "worker:dev":"nodemon worker.ts",
-
-    "build":"tsc",
-    
-    "start":"node dist/server.js",
+    "worker:dev": "nodemon worker.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "worker": "node dist/worker.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.10",
     "bullmq": "^5.78.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
+    "google-auth-library": "^10.7.0",
     "ioredis": "^5.10.1",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.21.0",
     "zod": "^3.23.8"
   },

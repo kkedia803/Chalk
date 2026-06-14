@@ -5,6 +5,7 @@ import { RiSplitCellsVertical } from "react-icons/ri";
 import { FaPlay } from "react-icons/fa";
 import { FiLoader } from "react-icons/fi";
 
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 export default function Topbar() {
   const { language, handleRun, toggleSidebar, toggleOutput, executionStatus } =
@@ -36,26 +37,28 @@ export default function Topbar() {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-1 flex-1 justify-end">
+      <div className="flex items-center gap-2 flex-1 justify-end">
         <RiSplitCellsVertical
           size={20}
           className="cursor-pointer hover:text-blue-400"
           onClick={toggleOutput}
         />
         {executionStatus !== "running" && (
-          <button
-            onClick={handleRun}
-            className="flex items-center gap-1.5 px-3.5 h-[30px] cursor-pointer hover:text-green-500 rounded ml-1.5 font-mono text-xs font-medium tracking-wider border transition-all duration-150"
-          >
-            <FaPlay />
-            run
-          </button>
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={handleRun}
+              className="flex items-center gap-1.5 px-3.5 h-[30px] cursor-pointer hover:text-green-500 rounded ml-1.5 font-mono text-xs font-medium tracking-wider border transition-all duration-150"
+            >
+              <FaPlay />
+              run
+            </button>
+
+            <GoogleSignInButton/>
+          </div>
         )}
 
         {executionStatus === "running" && (
-          <button
-            className="flex items-center gap-1.5 px-3.5 h-[30px] cursor-pointer hover:text-green-500 rounded ml-1.5 font-mono text-xs font-medium tracking-wider border transition-all duration-150"
-          >
+          <button className="flex items-center gap-1.5 px-3.5 h-[30px] cursor-pointer hover:text-green-500 rounded ml-1.5 font-mono text-xs font-medium tracking-wider border transition-all duration-150">
             <FiLoader className="animate-spin" />
             running
           </button>

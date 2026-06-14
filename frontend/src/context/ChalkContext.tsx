@@ -140,6 +140,18 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
     }
   },[]);
 
+  const handleGoogleLogin = async(googleToken:string) =>{
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google`,{
+      method:'post',
+      headers: {
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({googleToken})
+    });
+
+    console.log(res)
+  }
+
   // ── Clear output ────────────────────────────────────────────────────────
   const handleClear = useCallback(() => {
     setOutputLines([]);
@@ -171,7 +183,8 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
     jobId,
     pollJob,
     executionStatus,
-    runtime
+    runtime,
+    handleGoogleLogin
   };
 
   return (

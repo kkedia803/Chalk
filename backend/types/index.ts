@@ -24,3 +24,11 @@ export type languageConfig = {
 };
 
 export type supportedLanguage = "javascript" | "python" | "java" | "cpp";
+
+export type UserData = {
+  id: string;
+  name: string;
+  google_id: string;
+  email: string;
+  avatar_url: string | null;
+};

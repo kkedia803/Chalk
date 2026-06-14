@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { Jobs } from "../db/schema";
-import { truncateSync } from "node:fs";
 
 export const getJobService = async (jobId: string) => {
   try {

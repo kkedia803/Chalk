@@ -1,10 +1,10 @@
 import { Router } from "express";
-const router = Router();
+const executeRouter = Router();
 
 import { executeController } from "../controllers/execute.controller";
 import { getJobController } from "../controllers/getJob.controller";
 
-router.post('/execute', executeController);
-router.get('/execute/:jobId', getJobController);
+executeRouter.post('/execute', executeController);
+executeRouter.get('/execute/:jobId', getJobController);
 
-export default router;
+export default executeRouter;

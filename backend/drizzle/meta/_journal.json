@@ -15,6 +15,20 @@
       "when": 1781181190177,
       "tag": "0001_broad_vector",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781449337510,
+      "tag": "0002_common_vin_gonzales",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781450710088,
+      "tag": "0003_round_dreaming_celestial",
+      "breakpoints": true
     }
   ]
 }

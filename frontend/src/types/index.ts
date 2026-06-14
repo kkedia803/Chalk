@@ -125,4 +125,6 @@ export interface ChalkContextValue {
   executionStatus: ExecutionStatus
 
   runtime: number
+
+  handleGoogleLogin: (googleToken:string) =>void;
 }

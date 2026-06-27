@@ -1,3 +1,10 @@
+export interface Project {
+  id: string;
+  name: string;
+  createdAt: Date;
+}
+
+
 // ─── Language ────────────────────────────────────────────────────────────────
 
 export type Language = "javascript" | "java" | "python" | "cpp";
@@ -18,7 +25,13 @@ export const LANGUAGES: LanguageMeta[] = [
     dot: "#f7df1e",
     monacoLang: "javascript",
   },
-  { id: "java", label: "Java", ext: ".java", dot: "#3178c6", monacoLang: "java" },
+  {
+    id: "java",
+    label: "Java",
+    ext: ".java",
+    dot: "#3178c6",
+    monacoLang: "java",
+  },
   {
     id: "python",
     label: "Python",
@@ -85,7 +98,6 @@ export interface ExecutionResult {
   lines: OutputLine[];
 }
 
-
 // ─── Execution Status ────────────────────────────────────────────────────────────────
 
 export type ExecutionStatus = "idle" | "running" | "success" | "error";
@@ -95,6 +107,16 @@ export type ExecutionStatus = "idle" | "running" | "success" | "error";
 export interface UIState {
   sidebarOpen: boolean;
   outputOpen: boolean;
+}
+
+// --- User Data -----------------------------------------------------------
+
+export interface UserData {
+  id: string;
+  name: string;
+  google_id: string;
+  email: string;
+  avatar_url: string | null;
 }
 
 // ─── Context shape ───────────────────────────────────────────────────────────
@@ -118,13 +140,15 @@ export interface ChalkContextValue {
 
   //jobid
 
-  jobId:string
+  jobId: string;
 
-  pollJob: (jobId:string) => void;
+  pollJob: (jobId: string) => void;
 
-  executionStatus: ExecutionStatus
+  executionStatus: ExecutionStatus;
 
-  runtime: number
+  runtime: number;
 
-  handleGoogleLogin: (googleToken:string) =>void;
+  // handleGoogleLogin: (googleToken: string) => void;
+
+  // userData: UserData | null
 }

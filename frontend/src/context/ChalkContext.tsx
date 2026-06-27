@@ -6,7 +6,7 @@ import {
   type UIState,
   type ChalkContextValue,
   DEFAULT_CODE,
-  type ExecutionStatus
+  type ExecutionStatus,
 } from "../types";
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -37,8 +37,10 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
   });
   const [jobId, setJobId] = useState<string>("");
 
-  const [executionStatus, setExecutionStatus] = useState<ExecutionStatus>("idle");
+  const [executionStatus, setExecutionStatus] =
+    useState<ExecutionStatus>("idle");
   const [runtime, setRunTime] = useState(0);
+
 
   // ── Language change resets editor + output ──────────────────────────────
   const setLanguage = useCallback((lang: Language) => {
@@ -49,7 +51,6 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
   }, []);
 
   // ── Run ─────────────────────────────────────────────────────────────────
-
 
   const handleRun = async () => {
     try {
@@ -67,15 +68,18 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
 
       const dat = await res.json();
       setJobId(dat.jobId);
-    } catch (err:any) {
-      setExecutionStatus("error")
-      setOutputLines([...outputLines,
+    } catch (err: any) {
+      setExecutionStatus("error");
+      setOutputLines([
+        ...outputLines,
         {
-          type:"system",
+          type: "system",
           text: err.message,
-          timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"})
-        }
-      ])
+          timestamp: new Date().toLocaleTimeString("en-GB", {
+            hourCycle: "h12",
+          }),
+        },
+      ]);
     }
   };
 
@@ -84,7 +88,9 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
 
     while (!completed) {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/execute/${jobId}`);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/execute/${jobId}`,
+        );
 
         const job = await res.json();
 
@@ -95,7 +101,9 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
             {
               type: "stdout",
               text: job.output ?? "",
-              timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"}),
+              timestamp: new Date().toLocaleTimeString("en-GB", {
+                hourCycle: "h12",
+              }),
             },
           ]);
 
@@ -110,7 +118,9 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
             {
               type: "stderr",
               text: job.error ?? "Execution failed",
-              timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"}),
+              timestamp: new Date().toLocaleTimeString("en-GB", {
+                hourCycle: "h12",
+              }),
             },
           ]);
 
@@ -129,33 +139,25 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
           {
             type: "stderr",
             text: "Failed to fetch job status",
-            timestamp: new Date().toLocaleTimeString("en-GB",{hourCycle:"h12"}),
+            timestamp: new Date().toLocaleTimeString("en-GB", {
+              hourCycle: "h12",
+            }),
           },
         ]);
 
-        setExecutionStatus("error")
+        setExecutionStatus("error");
 
         completed = true;
       }
     }
-  },[]);
+  }, []);
 
-  const handleGoogleLogin = async(googleToken:string) =>{
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google`,{
-      method:'post',
-      headers: {
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify({googleToken})
-    });
 
-    console.log(res)
-  }
 
   // ── Clear output ────────────────────────────────────────────────────────
   const handleClear = useCallback(() => {
     setOutputLines([]);
-    setExecutionStatus("idle")
+    setExecutionStatus("idle");
   }, []);
 
   // ── UI toggles ──────────────────────────────────────────────────────────
@@ -184,7 +186,8 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
     pollJob,
     executionStatus,
     runtime,
-    handleGoogleLogin
+    // handleGoogleLogin,
+    // userData
   };
 
   return (

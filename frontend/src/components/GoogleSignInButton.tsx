@@ -1,8 +1,8 @@
 import { GoogleLogin } from "@react-oauth/google";
-import { useChalk } from "../context/ChalkContext";
+import { useAuth } from "../context/AuthContext";
 
 export const GoogleSignInButton = () => {
-  const { handleGoogleLogin } = useChalk();
+  const { handleGoogleLogin } = useAuth();
 
   return (
     <GoogleLogin

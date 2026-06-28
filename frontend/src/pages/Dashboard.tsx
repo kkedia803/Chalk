@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { type Project } from "../types";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router";
 
 function FolderIcon({ size = 56 }: { size?: number }) {
   const h = Math.round(size * 0.82);
@@ -41,12 +42,14 @@ function FolderIcon({ size = 56 }: { size?: number }) {
 function FolderCard({
   project,
   onRename,
+  onOpen,
 }: {
   project: Project;
   onRename: (id: string, name: string) => void;
+  onOpen: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(project.name);
+  const [draft, setDraft] = useState(project.projectName);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,17 +58,32 @@ function FolderCard({
 
   const commit = () => {
     const trimmed = draft.trim();
-    onRename(project.id, trimmed || project.name);
-    if (!trimmed) setDraft(project.name);
+    onRename(project.id, trimmed || project.projectName);
+    if (!trimmed) setDraft(project.projectName);
     setEditing(false);
   };
 
   return (
     <div
-      className="flex flex-col items-center gap-2 p-2 rounded-lg cursor-default select-none hover:bg-white/5 transition-colors duration-150 w-24"
-      onDoubleClick={() => setEditing(true)}
+      className="group flex flex-col items-center gap-2 p-2 rounded-lg cursor-default select-none hover:bg-white/5 transition-colors duration-150 w-24"
+      onDoubleClick={() => onOpen(project.id)}
     >
-      <FolderIcon size={56} />
+      <div className="relative">
+        <FolderIcon size={56} />
+        {!editing && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              setEditing(true);
+            }}
+            className="absolute -right-2 -top-2 rounded bg-zinc-800 px-1 text-[10px] text-zinc-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-white"
+            aria-label={`Rename ${project.projectName}`}
+          >
+            ✎
+          </button>
+        )}
+      </div>
       {editing ? (
         <input
           ref={inputRef}
@@ -75,7 +93,7 @@ function FolderCard({
           onKeyDown={(e) => {
             if (e.key === "Enter") commit();
             if (e.key === "Escape") {
-              setDraft(project.name);
+              setDraft(project.projectName);
               setEditing(false);
             }
           }}
@@ -84,7 +102,7 @@ function FolderCard({
         />
       ) : (
         <span className="text-[11.5px] text-zinc-400 text-center leading-snug break-words max-w-[88px]">
-          {project.name}
+          {project.projectName}
         </span>
       )}
     </div>
@@ -96,25 +114,53 @@ function FolderCard({
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const { authLoading, getUserData, userData } = useAuth();
+  const navigate = useNavigate();
 
-  // ── Add your API call inside this function ──
-  const createProject = (name: string = "Untitled"): Project => {
-    const newProject: Project = {
-      id: crypto.randomUUID(),
-      name,
-      createdAt: new Date(),
-    };
-    setProjects((prev) => [...prev, newProject]);
-    return newProject;
-    // TODO: await yourApiCall(newProject)
+  const authHeaders = () => ({
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("chalkToken") ?? ""}`,
+  });
+
+  const fetchProjects = async () => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/projects`, {
+      headers: authHeaders(),
+      credentials: "include",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setProjects(data.projects);
+    }
   };
 
-  const renameProject = (id: string, name: string) => {
-    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, name } : p)));
+  const createProject = async (name: string = "Untitled") => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/projects`, {
+      method: "post",
+      credentials: "include",
+      headers: authHeaders(),
+      body: JSON.stringify({ projectName: name }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setProjects((prev) => [...prev, data.project]);
+    }
+  };
+
+  const renameProject = async (id: string, name: string) => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/projects/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: authHeaders(),
+      body: JSON.stringify({ projectName: name }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setProjects((prev) => prev.map((p) => (p.id === id ? data.project : p)));
+    }
   };
 
   useEffect(() => {
     getUserData();
+    fetchProjects();
   }, []);
 
   if (authLoading) {
@@ -150,7 +196,7 @@ export default function Dashboard() {
       {/* Main */}
       <main className="flex-1 p-8">
         {projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40 pt-32">
+          <div className="group flex flex-col items-center justify-center h-full gap-3 opacity-40 pt-32">
             <FolderIcon size={48} />
             <p className="text-sm font-medium text-zinc-500">
               No projects yet.
@@ -166,7 +212,12 @@ export default function Dashboard() {
             style={{ gridTemplateColumns: "repeat(auto-fill, 96px)" }}
           >
             {projects.map((p) => (
-              <FolderCard key={p.id} project={p} onRename={renameProject} />
+              <FolderCard
+                key={p.id}
+                project={p}
+                onRename={renameProject}
+                onOpen={(id) => navigate(`/projects/${id}`)}
+              />
             ))}
           </div>
         )}

@@ -28,6 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        if (data.token) localStorage.setItem("chalkToken", data.token);
         navigate("/dashboard");
       }
     } catch (err) {
@@ -40,7 +42,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuthLoading(true);
         const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`,{
             method:"get",
-            credentials:"include"
+            credentials:"include",
+            headers: { Authorization: `Bearer ${localStorage.getItem("chalkToken") ?? ""}` },
         })
 
         if(!res.ok){

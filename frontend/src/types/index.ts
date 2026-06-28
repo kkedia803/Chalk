@@ -1,7 +1,17 @@
 export interface Project {
   id: string;
-  name: string;
-  createdAt: Date;
+  userId: string;
+  projectName: string;
+}
+
+export interface ProjectFile {
+  id: string;
+  projectId: string;
+  fileName: string;
+  language: Language;
+  code: string;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 
@@ -127,6 +137,7 @@ export interface ChalkContextValue {
   code: string;
   setCode: (code: string) => void;
   setLanguage: (lang: Language) => void;
+  loadCode: (lang: Language, nextCode: string) => void;
 
   // execution
   outputLines: OutputLine[];

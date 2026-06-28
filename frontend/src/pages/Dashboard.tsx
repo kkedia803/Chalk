@@ -113,7 +113,7 @@ function FolderCard({
 
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const { authLoading, getUserData, userData } = useAuth();
+  const { authLoading, getUserData, userData, logout } = useAuth();
   const navigate = useNavigate();
 
   const authHeaders = () => ({
@@ -186,11 +186,17 @@ export default function Dashboard() {
           </button>
 
           {userData?.avatar_url && (
-            <img
-              src={userData.avatar_url}
-              alt={userData.name}
-              className="h-10 w-10 rounded-full border border-white/30 "
-            />
+            <div className="group relative">
+              <button type="button" className="flex h-10 w-10 overflow-hidden rounded-full border border-white/30">
+                <img src={userData.avatar_url} alt={userData.name} className="h-full w-full object-cover" />
+              </button>
+              <div className="invisible absolute right-0 top-12 z-20 min-w-36 rounded-lg border border-zinc-800 bg-zinc-950 p-2 opacity-0 shadow-xl transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                <p className="mb-2 truncate px-2 text-[11px] text-zinc-400">{userData.name}</p>
+                <button type="button" onClick={logout} className="w-full rounded px-2 py-1.5 text-left text-xs text-zinc-200 hover:bg-zinc-800">
+                  Logout
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </header>
@@ -218,7 +224,7 @@ export default function Dashboard() {
                 key={p.id}
                 project={p}
                 onRename={renameProject}
-                onOpen={(id) => navigate(`/projects/${id}`)}
+                onOpen={(id) => navigate(`/dashboard/${id}`)}
               />
             ))}
           </div>

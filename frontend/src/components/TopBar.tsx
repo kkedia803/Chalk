@@ -6,8 +6,37 @@ import { FaPlay } from "react-icons/fa";
 import { FiLoader } from "react-icons/fi";
 
 import { GoogleSignInButton } from "./GoogleSignInButton";
+import { useAuth } from "../context/AuthContext";
 
-export default function Topbar({ title }: { title?: string }) {
+function ProfileMenu() {
+  const { userData, logout } = useAuth();
+
+  if (!userData?.avatar_url) return <GoogleSignInButton />;
+
+  return (
+    <div className="group relative">
+      <button
+        type="button"
+        className="flex h-8 w-8 overflow-hidden rounded-full border border-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        aria-label="Open profile menu"
+      >
+        <img src={userData.avatar_url} alt={userData.name} className="h-full w-full object-cover" />
+      </button>
+      <div className="invisible absolute right-0 top-9 z-[60] min-w-36 rounded-lg border border-zinc-800 bg-zinc-950 p-2 opacity-0 shadow-xl transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+        <p className="mb-2 truncate px-2 text-[11px] text-zinc-400">{userData.name}</p>
+        <button
+          type="button"
+          onClick={logout}
+          className="w-full rounded px-2 py-1.5 text-left text-xs text-zinc-200 hover:bg-zinc-800"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function Topbar({ title, onCreateProject }: { title?: string; onCreateProject?: () => void }) {
   const { language, handleRun, toggleSidebar, toggleOutput, executionStatus } =
     useChalk();
 
@@ -45,6 +74,14 @@ export default function Topbar({ title }: { title?: string }) {
         />
         {executionStatus !== "running" && (
           <div className="flex gap-4 items-center">
+            {onCreateProject && (
+              <button
+                onClick={onCreateProject}
+                className="flex items-center gap-1.5 px-3.5 h-[30px] cursor-pointer hover:text-indigo-300 rounded ml-1.5 font-mono text-xs font-medium tracking-wider border transition-all duration-150"
+              >
+                + project
+              </button>
+            )}
             <button
               onClick={handleRun}
               className="flex items-center gap-1.5 px-3.5 h-[30px] cursor-pointer hover:text-green-500 rounded ml-1.5 font-mono text-xs font-medium tracking-wider border transition-all duration-150"
@@ -53,7 +90,7 @@ export default function Topbar({ title }: { title?: string }) {
               run
             </button>
 
-            <GoogleSignInButton/>
+            <ProfileMenu />
           </div>
         )}
 

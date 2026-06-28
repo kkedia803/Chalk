@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useContext, createContext, useState, type ReactNode } from "react";
+import { useContext, createContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import type { UserData } from "../types";
 
@@ -8,13 +8,14 @@ interface AuthContext {
   authLoading: boolean;
   handleGoogleLogin: (googleToken: string) => void;
   getUserData : () =>void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContext | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [authLoading, setAuthLoading] = useState<boolean>(() => Boolean(localStorage.getItem("chalkToken")));
   const navigate = useNavigate();
 
   const handleGoogleLogin = async (googleToken: string) => {
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         if (data.token) localStorage.setItem("chalkToken", data.token);
+        await getUserData();
         navigate("/dashboard");
       }
     } catch (err) {
@@ -61,13 +63,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const logout = () => {
+    localStorage.removeItem("chalkToken");
+    setUserData(null);
+    navigate("/");
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem("chalkToken")) {
+      getUserData();
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
         userData,
         authLoading,
         handleGoogleLogin,
-        getUserData
+        getUserData,
+        logout
       }}
     >
       {children}

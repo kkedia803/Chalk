@@ -114,6 +114,7 @@ export const ExecutionPage = () => {
             selectedFileId={selectedFileId}
             onCreateFile={createFile}
             onSelectFile={selectFile}
+            onSelectLanguage={(nextLanguage) => loadCode(nextLanguage, code)}
           />
         </div>
 

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import {
@@ -75,13 +76,14 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
 
       const dat = await res.json();
       setJobId(dat.jobId);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Execution failed";
       setExecutionStatus("error");
       setOutputLines([
         ...outputLines,
         {
           type: "system",
-          text: err.message,
+          text: message,
           timestamp: new Date().toLocaleTimeString("en-GB", {
             hourCycle: "h12",
           }),

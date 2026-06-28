@@ -5,7 +5,7 @@ import { useChalk } from "../context/ChalkContext";
 
 export default function EditorPanel() {
   const { language, code, setCode } = useChalk();
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
 
   const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;

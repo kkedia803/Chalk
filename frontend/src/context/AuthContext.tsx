@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useContext, createContext, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import type { UserData } from "../types";
@@ -52,11 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const dat = await res.json();
 
-        setUserData(dat.userData[0]);
+        setUserData(dat.userData);
     } catch(err){
-        console.log(err)
+      console.log(err)
     } finally{
-        setAuthLoading(false)
+      setAuthLoading(false)
     }
   }
 

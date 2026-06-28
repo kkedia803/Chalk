@@ -1,5 +1,5 @@
 import { useChalk } from "../context/ChalkContext";
-import { LANGUAGES, type ProjectFile } from "../types";
+import { LANGUAGES, type Language, type ProjectFile } from "../types";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +14,7 @@ type SidebarProps = {
   selectedFileId?: string | null;
   onCreateFile?: () => void;
   onSelectFile?: (file: ProjectFile) => void;
+  onSelectLanguage?: (language: Language) => void;
 };
 
 export default function Sidebar({
@@ -21,8 +22,10 @@ export default function Sidebar({
   selectedFileId,
   onCreateFile,
   onSelectFile,
+  onSelectLanguage,
 }: SidebarProps) {
   const { language, setLanguage } = useChalk();
+  const handleSelectLanguage = onSelectLanguage ?? setLanguage;
 
   return (
     <aside className="h-screen flex-shrink-0 flex flex-col bg-Chalk-surface border-r border-Chalk-border overflow-hidden animate-slide-left">
@@ -65,7 +68,7 @@ export default function Sidebar({
           {LANGUAGES.map((lang) => (
             <button
               key={lang.id}
-              onClick={() => setLanguage(lang.id)}
+              onClick={() => handleSelectLanguage(lang.id)}
               className={`
                 cursor-pointer flex items-center gap-2 w-full px-2 py-1.5 rounded text-left text-[12.5px]
                 transition-colors duration-100

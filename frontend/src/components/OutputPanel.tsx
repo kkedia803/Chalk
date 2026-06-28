@@ -42,7 +42,7 @@ export default function OutputPanel() {
     if (!jobId) return;
 
     void pollJob(jobId);
-  }, [jobId]);
+  }, [jobId, pollJob]);
 
   return (
     <div className="h-full flex flex-col bg-zinc-950">
@@ -72,7 +72,7 @@ export default function OutputPanel() {
         </div>
 
         <div className="flex items-center gap-2">
-          {status === "running" && (
+          {executionStatus === "running" && (
             <div className="flex items-center gap-1.5 font-mono text-[10px] text-Chalk-accent tracking-widest uppercase">
               <span className="w-[5px] h-[5px] rounded-full bg-Chalk-accent animate-pulse-dot" />
               executing

@@ -160,14 +160,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     getUserData();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (authLoading) {
     return <div>Loading...</div>;
   }
-
-  console.log(userData);
 
   return (
     <div className="min-h-screen bg-black text-zinc-200 flex flex-col font-sans">
@@ -185,11 +185,13 @@ export default function Dashboard() {
             New Folder
           </button>
 
-          <div>
-            <div>
-              <img src={userData?.avatar_url!} alt={userData?.name}  className="h-10 w-10 rounded-full border border-white/30 "/>
-            </div>
-          </div>
+          {userData?.avatar_url && (
+            <img
+              src={userData.avatar_url}
+              alt={userData.name}
+              className="h-10 w-10 rounded-full border border-white/30 "
+            />
+          )}
         </div>
       </header>
 

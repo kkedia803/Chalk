@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { z } from "zod";
+import { eq } from "drizzle-orm";
 
+import { db } from "../db";
+import { Users } from "../db/schema";
 import { verifyGoogleToken } from "../services/verifyGoogleToken.service";
 import { findOrCreateUser } from "../services/findOrCreateUser.service";
 import { createJwt } from "../services/createJwt.service";
-
-import { UserData } from "../types"
 
 export const loginController = async (
   req: Request,
@@ -35,4 +35,24 @@ export const loginController = async (
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+export const meController = async (req: Request, res: Response): Promise<void> => {
+  if (!req.userId) {
+    res.status(401).json({ message: "Authentication required" });
+    return;
+  }
+
+  const [userData] = await db
+    .select()
+    .from(Users)
+    .where(eq(Users.id, req.userId))
+    .limit(1);
+
+  if (!userData) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  res.status(200).json({ userData });
 };

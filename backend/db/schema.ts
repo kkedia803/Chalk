@@ -19,3 +19,20 @@ export const Users = pgTable("users", {
   email: text().unique().notNull(),
   avatar_url: text()
 });
+
+
+export const Projects = pgTable("projects", {
+  id: uuid().primaryKey(),
+  userId: uuid("user_id"),
+  projectName: text("project_name").notNull(),
+});
+
+export const Files = pgTable("files", {
+  id: uuid().primaryKey(),
+  projectId: uuid("project_id"),
+  fileName: text("file_name").notNull(),
+  language: text().notNull(),
+  code: text().notNull(),
+  createdAt: timestamp("createdat").defaultNow(),
+  updatedAt: timestamp("updatedat").defaultNow(),
+});

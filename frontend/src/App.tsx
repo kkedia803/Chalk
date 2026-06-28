@@ -14,6 +14,7 @@ function Layout() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<ExecutionPage />} />
+          <Route path="/projects/:projectId" element={<ExecutionPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </AuthProvider>

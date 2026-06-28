@@ -50,6 +50,13 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
     setExecutionStatus("idle");
   }, []);
 
+  const loadCode = useCallback((lang: Language, nextCode: string) => {
+    setLanguageState(lang);
+    setCode(nextCode);
+    setOutputLines([]);
+    setExecutionStatus("idle");
+  }, []);
+
   // ── Run ─────────────────────────────────────────────────────────────────
 
   const handleRun = async () => {
@@ -176,6 +183,7 @@ export function ChalkProvider({ children }: ChalkProviderProps) {
     code,
     setCode,
     setLanguage,
+    loadCode,
     outputLines,
     handleRun,
     handleClear,

@@ -30,6 +30,7 @@ export const loginController = async (
 
     const userToken = await createJwt(user);
     
+    res.cookie("token", userToken, { httpOnly: true, sameSite: "lax", maxAge: 24 * 60 * 60 * 1000 });
     res.status(200).json({token:userToken});
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });

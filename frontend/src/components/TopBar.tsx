@@ -7,7 +7,7 @@ import { FiLoader } from "react-icons/fi";
 
 import { GoogleSignInButton } from "./GoogleSignInButton";
 
-export default function Topbar() {
+export default function Topbar({ title }: { title?: string }) {
   const { language, handleRun, toggleSidebar, toggleOutput, executionStatus } =
     useChalk();
 
@@ -31,7 +31,7 @@ export default function Topbar() {
 
         <div className="flex items-center gap-1.5 font-mono text-xs">
           <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-Chalk-active border border-Chalk-bright text-Chalk-secondary">
-            {language}
+            {title ? `${title} · ${language}` : language}
           </span>
         </div>
       </div>

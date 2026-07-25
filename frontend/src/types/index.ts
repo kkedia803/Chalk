@@ -52,6 +52,19 @@ export const LANGUAGES: LanguageMeta[] = [
   { id: "cpp", label: "C++", ext: ".cpp", dot: "#9b113d", monacoLang: "cpp" },
 ];
 
+export const fileNameForLanguage = (name: string, language: Language) => {
+  const extension = LANGUAGES.find((item) => item.id === language)?.ext ?? "";
+  const baseName = name.trim().replace(/\.(js|py|java|cpp)$/i, "");
+  return `${baseName}${extension}`;
+};
+
+export const fileBaseName = (name: string, language: Language) => {
+  const extension = LANGUAGES.find((item) => item.id === language)?.ext ?? "";
+  return extension && name.toLowerCase().endsWith(extension)
+    ? name.slice(0, -extension.length)
+    : name;
+};
+
 export const DEFAULT_CODE: Record<Language, string> = {
   javascript: `// Welcome to Chalk
 console.log("Hello, world!");

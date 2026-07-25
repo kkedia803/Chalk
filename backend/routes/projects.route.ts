@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createFile,
   createProject,
+  deleteProject,
   deleteFile,
   getProject,
   listProjects,
@@ -16,6 +17,7 @@ projectsRouter.use(verifyJwt);
 projectsRouter.get("/projects", listProjects);
 projectsRouter.post("/projects", createProject);
 projectsRouter.patch("/projects/:projectId", renameProject);
+projectsRouter.delete("/projects/:projectId", deleteProject);
 projectsRouter.get("/projects/:projectId", getProject);
 projectsRouter.post("/projects/:projectId/files", createFile);
 projectsRouter.patch("/projects/:projectId/files/:fileId", updateFile);

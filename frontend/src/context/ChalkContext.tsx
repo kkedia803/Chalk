@@ -1,206 +1,221 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback } from "react";
-import type { ReactNode } from "react";
 import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+
+import {
+  DEFAULT_CODE,
+  type ExecutionStatus,
   type Language,
   type OutputLine,
   type UIState,
-  type ChalkContextValue,
-  DEFAULT_CODE,
-  type ExecutionStatus,
 } from "../types";
 
-// ─── Context ─────────────────────────────────────────────────────────────────
+type EditorCodeContextValue = {
+  code: string;
+  setCode: (code: string) => void;
+};
 
-const ChalkContext = createContext<ChalkContextValue | null>(null);
+type EditorMetaContextValue = {
+  language: Language;
+  setLanguage: (language: Language) => void;
+  loadCode: (language: Language, code: string) => void;
+};
 
-// ─── Hook ────────────────────────────────────────────────────────────────────
+type ExecutionContextValue = {
+  outputLines: OutputLine[];
+  handleRun: () => void;
+  handleClear: () => void;
+  jobId: string;
+  pollJob: (jobId: string) => void;
+  executionStatus: ExecutionStatus;
+  runtime: number;
+};
 
-export function useChalk(): ChalkContextValue {
-  const ctx = useContext(ChalkContext);
-  if (!ctx) throw new Error("useChalk must be used inside <ChalkProvider>");
-  return ctx;
+type LayoutContextValue = {
+  ui: UIState;
+  toggleSidebar: () => void;
+  toggleOutput: () => void;
+};
+
+const EditorCodeContext = createContext<EditorCodeContextValue | null>(null);
+const EditorMetaContext = createContext<EditorMetaContextValue | null>(null);
+const ExecutionContext = createContext<ExecutionContextValue | null>(null);
+const LayoutContext = createContext<LayoutContextValue | null>(null);
+
+export function useEditorCode() {
+  const context = useContext(EditorCodeContext);
+  if (!context) throw new Error("useEditorCode must be used inside ChalkProvider");
+  return context;
 }
 
-// ─── Provider ────────────────────────────────────────────────────────────────
-
-interface ChalkProviderProps {
-  children: ReactNode;
+export function useEditorMeta() {
+  const context = useContext(EditorMetaContext);
+  if (!context) throw new Error("useEditorMeta must be used inside ChalkProvider");
+  return context;
 }
 
-export function ChalkProvider({ children }: ChalkProviderProps) {
+export function useExecution() {
+  const context = useContext(ExecutionContext);
+  if (!context) throw new Error("useExecution must be used inside ChalkProvider");
+  return context;
+}
+
+export function useChalkLayout() {
+  const context = useContext(LayoutContext);
+  if (!context) throw new Error("useChalkLayout must be used inside ChalkProvider");
+  return context;
+}
+
+export function ChalkProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("javascript");
-  const [code, setCode] = useState(DEFAULT_CODE["javascript"]);
+  const [code, setCode] = useState(DEFAULT_CODE.javascript);
+  const editorSnapshot = useRef({ language, code });
+  useEffect(() => {
+    editorSnapshot.current = { language, code };
+  }, [code, language]);
+
   const [outputLines, setOutputLines] = useState<OutputLine[]>([]);
-  const [ui, setUI] = useState<UIState>({
-    sidebarOpen: true,
-    outputOpen: true,
-  });
-  const [jobId, setJobId] = useState<string>("");
+  const [jobId, setJobId] = useState("");
+  const [executionStatus, setExecutionStatus] = useState<ExecutionStatus>("idle");
+  const [runtime, setRuntime] = useState(0);
+  const [ui, setUI] = useState<UIState>({ sidebarOpen: true, outputOpen: true });
 
-  const [executionStatus, setExecutionStatus] =
-    useState<ExecutionStatus>("idle");
-  const [runtime, setRunTime] = useState(0);
-
-
-  // ── Language change resets editor + output ──────────────────────────────
-  const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
-    setCode(DEFAULT_CODE[lang]);
+  const setLanguage = useCallback((nextLanguage: Language) => {
+    setLanguageState(nextLanguage);
+    setCode(DEFAULT_CODE[nextLanguage]);
     setOutputLines([]);
     setExecutionStatus("idle");
   }, []);
 
-  const loadCode = useCallback((lang: Language, nextCode: string) => {
-    setLanguageState(lang);
+  const loadCode = useCallback((nextLanguage: Language, nextCode: string) => {
+    setLanguageState(nextLanguage);
     setCode(nextCode);
     setOutputLines([]);
     setExecutionStatus("idle");
   }, []);
 
-  // ── Run ─────────────────────────────────────────────────────────────────
-
-  const handleRun = async () => {
+  const handleRun = useCallback(async () => {
     try {
       setExecutionStatus("running");
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/execute`, {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          language,
-          code,
-        }),
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editorSnapshot.current),
       });
 
-      const dat = await res.json();
-      setJobId(dat.jobId);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Execution failed";
+      if (!response.ok) throw new Error("Could not start execution");
+      const data = await response.json();
+      setJobId(data.jobId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Execution failed";
       setExecutionStatus("error");
-      setOutputLines([
-        ...outputLines,
+      setOutputLines((current) => [
+        ...current,
         {
           type: "system",
           text: message,
-          timestamp: new Date().toLocaleTimeString("en-GB", {
-            hourCycle: "h12",
-          }),
+          timestamp: new Date().toLocaleTimeString("en-GB", { hourCycle: "h12" }),
         },
       ]);
     }
-  };
+  }, []);
 
-  const pollJob = useCallback(async (jobId: string) => {
+  const pollJob = useCallback(async (nextJobId: string) => {
     let completed = false;
 
     while (!completed) {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/execute/${jobId}`,
-        );
-
-        const job = await res.json();
-
-        // setStatus(job.status);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/execute/${nextJobId}`);
+        if (!response.ok) throw new Error("Failed to fetch job status");
+        const job = await response.json();
 
         if (job.status === "completed") {
-          setOutputLines([
-            {
-              type: "stdout",
-              text: job.output ?? "",
-              timestamp: new Date().toLocaleTimeString("en-GB", {
-                hourCycle: "h12",
-              }),
-            },
-          ]);
-
+          setOutputLines([{
+            type: "stdout",
+            text: job.output ?? "",
+            timestamp: new Date().toLocaleTimeString("en-GB", { hourCycle: "h12" }),
+          }]);
           setExecutionStatus("success");
-          setRunTime(job.runtime);
-
+          setRuntime(job.runtime);
           completed = true;
-        }
-
-        if (job.status === "failed") {
-          setOutputLines([
-            {
-              type: "stderr",
-              text: job.error ?? "Execution failed",
-              timestamp: new Date().toLocaleTimeString("en-GB", {
-                hourCycle: "h12",
-              }),
-            },
-          ]);
-
-          setExecutionStatus("error");
-
-          completed = true;
-        }
-
-        if (!completed) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      } catch (err) {
-        console.error(err);
-
-        setOutputLines([
-          {
+        } else if (job.status === "failed") {
+          setOutputLines([{
             type: "stderr",
-            text: "Failed to fetch job status",
-            timestamp: new Date().toLocaleTimeString("en-GB", {
-              hourCycle: "h12",
-            }),
-          },
-        ]);
+            text: job.error ?? "Execution failed",
+            timestamp: new Date().toLocaleTimeString("en-GB", { hourCycle: "h12" }),
+          }]);
+          setExecutionStatus("error");
+          completed = true;
+        }
 
+        if (!completed) await new Promise((resolve) => window.setTimeout(resolve, 800));
+      } catch {
+        setOutputLines([{
+          type: "stderr",
+          text: "Failed to fetch job status",
+          timestamp: new Date().toLocaleTimeString("en-GB", { hourCycle: "h12" }),
+        }]);
         setExecutionStatus("error");
-
         completed = true;
       }
     }
   }, []);
 
-
-
-  // ── Clear output ────────────────────────────────────────────────────────
   const handleClear = useCallback(() => {
     setOutputLines([]);
     setExecutionStatus("idle");
   }, []);
 
-  // ── UI toggles ──────────────────────────────────────────────────────────
-  const toggleSidebar = useCallback(
-    () => setUI((prev) => ({ ...prev, sidebarOpen: !prev.sidebarOpen })),
-    [],
-  );
+  const toggleSidebar = useCallback(() => {
+    setUI((current) => ({ ...current, sidebarOpen: !current.sidebarOpen }));
+  }, []);
 
-  const toggleOutput = useCallback(
-    () => setUI((prev) => ({ ...prev, outputOpen: !prev.outputOpen })),
-    [],
-  );
+  const toggleOutput = useCallback(() => {
+    setUI((current) => ({ ...current, outputOpen: !current.outputOpen }));
+  }, []);
 
-  const value: ChalkContextValue = {
-    language,
+  const editorCodeValue = useMemo<EditorCodeContextValue>(() => ({
     code,
     setCode,
+  }), [code]);
+
+  const editorMetaValue = useMemo<EditorMetaContextValue>(() => ({
+    language,
     setLanguage,
     loadCode,
+  }), [language, loadCode, setLanguage]);
+
+  const executionValue = useMemo<ExecutionContextValue>(() => ({
     outputLines,
     handleRun,
     handleClear,
-    ui,
-    toggleSidebar,
-    toggleOutput,
     jobId,
     pollJob,
     executionStatus,
     runtime,
-    // handleGoogleLogin,
-    // userData
-  };
+  }), [executionStatus, handleClear, handleRun, jobId, outputLines, pollJob, runtime]);
+
+  const layoutValue = useMemo<LayoutContextValue>(() => ({
+    ui,
+    toggleSidebar,
+    toggleOutput,
+  }), [toggleOutput, toggleSidebar, ui]);
 
   return (
-    <ChalkContext.Provider value={value}>{children}</ChalkContext.Provider>
+    <EditorCodeContext.Provider value={editorCodeValue}>
+      <EditorMetaContext.Provider value={editorMetaValue}>
+        <ExecutionContext.Provider value={executionValue}>
+          <LayoutContext.Provider value={layoutValue}>{children}</LayoutContext.Provider>
+        </ExecutionContext.Provider>
+      </EditorMetaContext.Provider>
+    </EditorCodeContext.Provider>
   );
 }

@@ -56,3 +56,8 @@ export const meController = async (req: Request, res: Response): Promise<void> =
 
   res.status(200).json({ userData });
 };
+
+export const logoutController = (_req: Request, res: Response): void => {
+  res.clearCookie("token", { httpOnly: true, sameSite: "lax" });
+  res.status(204).send();
+};

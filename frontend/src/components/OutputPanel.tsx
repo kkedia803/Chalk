@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { useChalk } from "../context/ChalkContext";
+import { memo, useEffect, useRef } from "react";
+import { useExecution } from "../context/ChalkContext";
 import type { OutputLineType } from "../types";
 
 import { IoTerminalOutline } from "react-icons/io5";
@@ -29,9 +29,9 @@ const LINE_STYLE: Record<
   },
 };
 
-export default function OutputPanel() {
+function OutputPanel() {
   const { outputLines, handleClear, jobId, pollJob, executionStatus, runtime } =
-    useChalk();
+    useExecution();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -138,3 +138,5 @@ export default function OutputPanel() {
     </div>
   );
 }
+
+export default memo(OutputPanel);

@@ -1,5 +1,6 @@
-import { useChalk } from "../context/ChalkContext";
+import { useEditorMeta } from "../context/ChalkContext";
 import { LANGUAGES, type Language, type ProjectFile } from "../types";
+import { useAuth } from "../context/AuthContext";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ type SidebarProps = {
   files?: ProjectFile[];
   selectedFileId?: string | null;
   onCreateFile?: () => void;
+  onCreateProject?: () => void;
   onSelectFile?: (file: ProjectFile) => void;
   onSelectLanguage?: (language: Language) => void;
 };
@@ -21,10 +23,12 @@ export default function Sidebar({
   files = [],
   selectedFileId,
   onCreateFile,
+  onCreateProject,
   onSelectFile,
   onSelectLanguage,
 }: SidebarProps) {
-  const { language, setLanguage } = useChalk();
+  const { language, setLanguage } = useEditorMeta();
+  const { userData, authLoading } = useAuth();
   const handleSelectLanguage = onSelectLanguage ?? setLanguage;
 
   return (
@@ -32,14 +36,26 @@ export default function Sidebar({
       <div className="px-3 pt-3.5 pb-2.5 border-b border-Chalk-border">
         <div className="flex items-center justify-between mb-2">
           <SectionLabel>FILES</SectionLabel>
+          <div className="flex items-center gap-1">
+          {onCreateProject && (
+            <button
+              onClick={onCreateProject}
+              className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-Chalk-secondary hover:bg-zinc-700"
+              title="Create project from this workspace"
+            >
+              + project
+            </button>
+          )}
           {onCreateFile && (
             <button
               onClick={onCreateFile}
-              className="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-Chalk-secondary"
+              className="rounded bg-zinc-800 px-2 py-1 text-xs text-Chalk-secondary hover:bg-zinc-700"
+              title="Create file"
             >
               +
             </button>
           )}
+          </div>
         </div>
         <div className="flex flex-col gap-px">
           {files.length === 0 ? (
@@ -62,6 +78,7 @@ export default function Sidebar({
         </div>
       </div>
 
+      {!authLoading && !userData && (
       <div className="px-3 pt-3.5 pb-2.5">
         <SectionLabel>LANGUAGE</SectionLabel>
         <div className="flex flex-col gap-px">
@@ -86,6 +103,7 @@ export default function Sidebar({
           ))}
         </div>
       </div>
+      )}
     </aside>
   );
 }

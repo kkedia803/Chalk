@@ -1,13 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useContext, createContext, useState, type ReactNode } from "react";
+import { useContext, createContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import type { UserData } from "../types";
+import { useFeedback } from "./FeedbackContext";
 
 interface AuthContext {
   userData: UserData | null;
   authLoading: boolean;
   handleGoogleLogin: (googleToken: string) => void;
   getUserData : () =>void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContext | null>(null);
@@ -16,6 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const navigate = useNavigate();
+  const { toast } = useFeedback();
 
   const handleGoogleLogin = async (googleToken: string) => {
     try {
@@ -31,10 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         if (data.token) localStorage.setItem("chalkToken", data.token);
+        await getUserData();
+        toast("Signed in successfully.", "success");
         navigate("/dashboard");
+      } else {
+        toast("Google sign-in failed. Please try again.", "error");
       }
     } catch (err) {
       console.log(err);
+      toast("Could not connect to the sign-in service.", "error");
     }
   };
 
@@ -55,11 +63,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setUserData(dat.userData);
     } catch(err){
+      setUserData(null);
       console.log(err)
     } finally{
       setAuthLoading(false)
     }
   }
+
+  const logout = async () => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/auth/google/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      localStorage.removeItem("chalkToken");
+      setUserData(null);
+      navigate("/");
+      toast("You have been logged out.", "success");
+    }
+  };
+
+  useEffect(() => {
+    void getUserData();
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -67,7 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userData,
         authLoading,
         handleGoogleLogin,
-        getUserData
+        getUserData,
+        logout,
       }}
     >
       {children}
